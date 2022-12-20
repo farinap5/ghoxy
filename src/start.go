@@ -5,17 +5,29 @@ import (
 	"net/http"
 )
 
-func ServerConfInit() ServerConf {
+func ServerConfInit() Proxy {
 	var addr = flag.String("a","0.0.0.0:8080","Address")
 	var cert = flag.String("crt","none","Certificate")
 	var pem  = flag.String("key","none","TLS Key")
-	flag.Usage = Help
-	flag.Parse() 
 
-	x := ServerConf {
+	var user = flag.String("u","none","User")
+	var pass = flag.String("p","none","Pass")
+	flag.Usage = Help
+	flag.Parse()
+
+	bauth := false
+	if *user != "none" && *pass != "none" {
+		PrintSucc("Basic authentication for user "+*user)
+		bauth = true
+	}
+
+	x := Proxy {
 		Addr: *addr,
 		Cert: *cert,
 		Pem: *pem,
+		User: *user,
+		Pass: *pass,
+		basicAuth: bauth,
 	}
 
 	if *cert != "none" && *pem != "none" {
@@ -26,8 +38,8 @@ func ServerConfInit() ServerConf {
 	return x
 }
 
-func (c ServerConf) InitServer() {
-	handler := &Proxy{}
+func (c Proxy) InitServer() {
+	handler := &c
 	
 	server := &http.Server{
 		Addr: c.Addr,

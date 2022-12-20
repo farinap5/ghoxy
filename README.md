@@ -6,6 +6,8 @@ It can be used for pivoting during pentest activities.
 
 It does not supports back end with HTTPS.
 
+Ghoxy supports basic authentication.
+
 **Help Menu**
 
 ```
@@ -15,7 +17,10 @@ COMMAND  DESCRIPTION
 -------  -----------
 -a       Address: 0.0.0.0:8080
 -crt     TLS certificate
--key     TLS key
+-key     TLS key 
+-u       User for basic auth
+-p       Password for basic auth
+
 ```
 
 Starting listener and testing:

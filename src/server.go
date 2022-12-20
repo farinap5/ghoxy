@@ -7,12 +7,25 @@ import (
 	"net/http"
 )
 
+
+
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Request ID
 	rid := GenRequestID(16)
 
 	client := &http.Client{}
 	r.RequestURI = ""
+
+	// Validate authentication
+	if p.basicAuth {
+		if !p.ValidateBasicAuth(r.Header) {
+			msg := "\"Proxy Authentication Required\""
+			log.Printf("rhost=%s method=%s url=%s statuscode=\"%s\" status=%s msg=%s id=%s", 
+			r.RemoteAddr, r.Method, r.URL,"NA","error",msg,rid)
+			http.Error(w,msg,http.StatusProxyAuthRequired)
+			return
+		}
+	}
 
 	// Compile X-Forwarded-For
 	clientIP, _ ,err := net.SplitHostPort(r.RemoteAddr)
@@ -23,6 +36,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w,msg,http.StatusBadRequest)
 		return
 	}
+
 	CompileXForwardHead(r.Header,clientIP)
 	AddRequestID(&r.Header,rid)
 	DelProxyHead(&r.Header)
